@@ -6,7 +6,7 @@ February 3rd, 2025
 
 ## Abstract
 
-Advent of Code is a yearly programming contest made up of Christmas-themed puzzles designed to be solved using any programming language. This paper measures how well the gemini-2.0-flash-thinking-exp-01-21 LLM solves the 2024 contest puzzles.
+The Advent of Code is a yearly programming contest made up of Christmas-themed puzzles designed to be solved using any programming language. This paper measures how well the gemini-2.0-flash-thinking-exp-01-21 LLM solves the 2024 contest puzzles.
 
 A prompt was developed to guide the model in a multi-turn conversation. The model is given 5 conversational turns to produce a correct puzzle solution.
 
