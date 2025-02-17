@@ -1,33 +1,16 @@
-# Using a Gemini Thinking Model to Solve Advent of Code 2024 Puzzles in Multiple Programming Languages
-
-jack.palevich@gmail.com
-
-February 3rd, 2025
-
-## Abstract
-
-The Advent of Code is a yearly programming contest made up of Christmas-themed puzzles designed to be solved using any programming language. This paper measures how well the gemini-2.0-flash-thinking-exp-01-21 LLM solves the 2024 contest puzzles.
-
-A prompt was developed to guide the model in a multi-turn conversation. The model is given 5 conversational turns to produce a correct puzzle solution.
-
-Results: 24 popular programming languages were measured. Depending on the programming language used, the model is capable of solving from a high of 69% to a low of 8% of the puzzles.
-
-The model optionally supports code execution of Python programs. Enabling code execution results in poorer performance. The solve rate with no code execution: 69%, code execution of examples: 59%, code execution of examples and the actual puzzle input: 16%.
-
-
-## Introduction
+# Introduction
 
 The Advent of Code[@wastl_adventofcode] is programming contest held annually during the first 25 days of December. A total of 25 puzzles are released, one a day. Each puzzle has two parts, except for the final day, which has just one part. The puzzles vary in difficulty. Early-day puzzles and weekday puzzles tend to be easier than later-day and weekend puzzles. The second part of a puzzle cannot be attempted until the first part is solved. The second part is sometimes significantly more difficult than the first part. Although the puzzles are typically solved using Python [@wastl_adventofcode_keynote_2022], contestants are permitted to use any process they wish to solve the puzzles.
 
 This paper measures how well the Google Gemini 2.0 Flash Thinking EXP 01-21 LLM can can solve Advent of Code puzzles. To successfully solve an Advent of Code puzzle, a LLM must understand potentially ambiguous instructions, select an algorithm, generate valid Python code, and debug any errors, timeouts or incorrect answers in the resulting program.
 
-## Methodology
+# Methodology
 
-### Models Tested
+## Models Tested
 
 I tested the Google Gemini 2.0 Flash Thinking EXP 01-21 model. This model was chosen because it is representaive of recent reasoning models and Google provides a public API for accessing the model with a generous free quota.
 
-### Programming Languages Tested
+## Programming Languages Tested
 
 While Python is the most common language used to solve Advent of Code puzzles, many other languages are commonly used. I chose to test the following languages. In each case, the runtime for the language was installed on the test machine (a Macbook Pro running MacOS 15.3).
 
@@ -59,17 +42,19 @@ While Python is the most common language used to solve Advent of Code puzzles, m
 | TypeScript  | 5.7.3                          |
 | Zig         | 0.13.0                         |
 
-### Experimental Setup
+## Experimental Setup
 
 I used the google.generativeai Python API to access the model.
 
 All model parameters (such as temperature) were left at their default values.
 
-It took about 12 hours of wall-clock time to gather this experimental data.
+See [https://github.com/jackpal/aoc_conversation](TO BE RELEASED) for the client-side code.
 
-Each language took between 49 and 245 conversation turns to test. 49 is the best case if every puzzle is solved correctly on the first try. 5*49 == 245 is the worst case, if every puzzle takes 5 turns to solve.
+In order to reproduce this paper, you will need to spend about 12 hours of wall clock time.
 
-At the time the experiment was run, Google was providing generous free quota limits for testing out their latest models.
+Each language takes between 49 and 245 conversation turns to test. 49 is the best case if every puzzle is solved correctly on the first try. 5*49 == 245 is the worst case, if every puzzle takes 5 turns to solve.
+
+Double-check current pricing and quota for Gemini, as the pricing may have changed since this document was written.
 
 | Model                               |   Free Quota Limits |
 | ----------------------------------- | ------------------: |
@@ -97,9 +82,9 @@ for turn in range(5):
 
 The limit of 5 conversation turns was chosen by trial and error during development. It was common for a LLM to need 3-to-5 turns to solve a puzzle. The first turn might result in a syntax error, the second in an input parsing runtime error, the third in a timeout, the fourth is an incorrect answer, and so on.
 
-## Results
+# Results
 
-### Comparing Language Performance
+## Comparing Language Performance
 
 When comparing model performance using different languages, it is useful to distinguish between the different ways that a program might fail to generate the correct answer:
 
@@ -117,11 +102,11 @@ Note that there are 49 possible puzzles, which is why the percentages shown are 
 
 ![Solvability by Language](figures/languages_ranking.png)
 
-### General Observations
+## General Observations
 
 The model was run at its default temperature, which introduced variations in results over repeated runs. The model might succeed in solving a given puzzle on one run, but fail on another run. Keep in mind that the reported numbers could change +/- 2 puzzles if the same experiment were performed again. Therefore don't take the details of language ranking too seriously. Another run could well flip the positions of any two nearby languages.
 
-### Puzzle-Specific Observations
+## Puzzle-Specific Observations
 
 Some puzzles were particularly hard for the model. The following puzzles not solved by any language:
 
@@ -139,7 +124,7 @@ Some puzzles were particularly hard for the model. The following puzzles not sol
 
 FWIW these puzzles were difficult for humans to solve, too.
 
-### Language-Specific Observations
+## Language-Specific Observations
 
 When interpreting the language rankings, keep in mind that the model has a non-zero temperature, so results vary from run to run.
 Any two languages that are within a few percent of each other on the chart could swap positions in subsequent runs.
@@ -185,13 +170,25 @@ The  `code_execution` and `ce_prompt` were similar enough that the difference ma
 
 The `ce_answer` result was particularly poor. One reason appears to be that the model may have trouble properly parsing and using the actual puzzle input, which was often in the form of a very large batch of numbers or a large character grid.
 
-## Discussion
+## A digression: the effect of memorization on solvability
+
+Tha Advent of Code contest fosters an [active open-source and open-discussion culture](https://www.reddit.com/r/adventofcode/). Past contest puzzle algorithms and solutions are widely available on the web. To discourage trivial cheating, participants are discouraged from publishing the actual input data and answers. What this means is that solutions to past years Advent of Code puzzles are widely available on the web, and are probably present in most frontier LLM training data.
+
+Looking at the solve rate for each year, we see that in general the model did better on older years than it did in 2024. But note that many years were not perfectly solved, despite the likelyhood that the LLM did see the solutions for those years in the training data.
+
+![AoC All Years Puzzle Solvability](figures/all_years_status.png)
+
+![AoC All Years Puzzle Heatmap](figures/all_years_heatmap.png)
+
+The model had trouble with 2019's IntCode puzzles, which were a series of simple virtual machine interpreter puzzles that built upon previous puzzles. This puzzle set was also difficult for humans.
+
+# Discussion
 
 Advent of Code puzzles are not necessarily representative of general coding problems. They are stylized, and their instructions are written with enjoyable but potentially distracting Christmas-themed details. On the other hand, the puzzle descriptions are extensively tested during development. This leads to specs that contain a lot of useful details.
 
 This year's puzzles were weighted towards 2D grid problems. Model performance may have been affected by that.
 
-### Directions for future work
+## Directions for future work
 
 The experiment could be continued, both to produce error bars for the existing measurements and to measure additional languages and models.
 
@@ -205,15 +202,8 @@ It would be interesting to develop a heuristic for how many turns to give a mode
 
 Most Advent of Code puzzles can be easily solved if you take the right approach. It might be possible to split the puzzle solving into a search for the right approach followed by a separate prompt series to implement the right approach.
 
-## Conclusion
+# Conclusion
 
 Because this evaluation is relatively quick and inexpensive to run, and because it produces a wide range of scores for different languages and code execution modes, it could serve as a useful benchmark for evaluating model performance, now and for the next few years.
 
-## References
-
-* **Wikipedia contributors**. (2025). *Large Language Model*. [Online; accessed 4-January-2025]. Available: [https://en.wikipedia.org/w/index.php?title=Large_language_model&oldid=1267032005](https://en.wikipedia.org/w/index.php?title=Large_language_model&oldid=1267032005)
-* **Wastl, E.** (2015--present). *Advent of Code*. [Online]. Available: [https://adventofcode.com](https://adventofcode.com)
-* **Wastl, E.** (2024). *About Advent of Code*. [Online]. Available: [https://adventofcode.com/2024/about](https://adventofcode.com/2024/about)
-* **Wastl, E.** (2022). *Keynote: Advent of Code, Behind the Scenes*. [YouTube; Accessed: 2025-01-02]. Available: [https://www.youtube.com/watch?v=uZ8DcbhojOw](https://www.youtube.com/watch?v=uZ8DcbhojOw)
-* **Glenn, W.** (2023). *advent-of-code-data*. GitHub repository. Available: [https://github.com/wimglenn/advent-of-code-data](https://github.com/wimglenn/advent-of-code-data)
-* **Gemini Team et al.** (2024). *Gemini: A Family of Highly Capable Multimodal Models*. arXiv:2312.11805 \[cs.CL]. Available: [https://arxiv.org/abs/2312.11805](https://arxiv.org/abs/2312.11805)
+# References
