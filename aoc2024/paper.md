@@ -1,14 +1,15 @@
+
 # Introduction
 
-The Advent of Code[@wastl_adventofcode] is programming contest held annually during the first 25 days of December. A total of 25 puzzles are released, one a day. Each puzzle has two parts, except for the final day, which has just one part. The puzzles vary in difficulty. Early-day puzzles and weekday puzzles tend to be easier than later-day and weekend puzzles. The second part of a puzzle cannot be attempted until the first part is solved. The second part is sometimes significantly more difficult than the first part. Although the puzzles are typically solved using Python [@wastl_adventofcode_keynote_2022], contestants are permitted to use any process they wish to solve the puzzles.
+The Advent of Code[@wastl_adventofcode] is a programming contest held annually during the first 25 days of December.  A total of 25 puzzles are released, one a day. Each puzzle has two parts, except for the final day, which has just one part. The puzzles vary in difficulty. Early-day puzzles and weekday puzzles tend to be easier than later-day and weekend puzzles. The second part of a puzzle cannot be attempted until the first part is solved. The second part is sometimes significantly more difficult than the first part. Although the puzzles are typically solved using Python [@wastl_adventofcode_keynote_2022], contestants are permitted to use any programming language, or indeed any puzzle-solving technique of any kind, to solve the puzzles.
 
-This paper measures how well the Google Gemini 2.0 Flash Thinking EXP 01-21 LLM can can solve Advent of Code puzzles. To successfully solve an Advent of Code puzzle, a LLM must understand potentially ambiguous instructions, select an algorithm, generate valid Python code, and debug any errors, timeouts or incorrect answers in the resulting program.
+This paper measures how well the Google Gemini 2.0 Flash Thinking EXP 01-21 LLM can solve Advent of Code puzzles. To successfully solve an Advent of Code puzzle, an LLM must interpret potentially ambiguous instructions, select an algorithm, generate valid code, and debug any errors, timeouts, or incorrect answers in the resulting program.
 
 # Methodology
 
 ## Models Tested
 
-I tested the Google Gemini 2.0 Flash Thinking EXP 01-21 model. This model was chosen because it is representaive of recent reasoning models and Google provides a public API for accessing the model with a generous free quota.
+I tested the Google Gemini 2.0 Flash Thinking EXP 01-21 model. This model was chosen because it is representative of recent reasoning models, and Google provides a public API for accessing the model with a generous free quota.
 
 ## Programming Languages Tested
 
@@ -52,7 +53,7 @@ See [https://github.com/jackpal/aoc_conversation](TO BE RELEASED) for the client
 
 In order to reproduce this paper, you will need to spend about 12 hours of wall clock time.
 
-Each language takes between 49 and 245 conversation turns to test. 49 is the best case if every puzzle is solved correctly on the first try. 5*49 == 245 is the worst case, if every puzzle takes 5 turns to solve.
+Each language takes between 49 and 245 conversation turns to test. 49 is the best case if every puzzle is solved correctly on the first try. 5 \* 49 == 245 is the worst case, if every puzzle takes 5 turns to solve.
 
 Double-check current pricing and quota for Gemini, as the pricing may have changed since this document was written.
 
@@ -64,7 +65,7 @@ The experiment data was collected from 2025-01-31 to 2025-02-03. The start date 
 
 The [Advent of Code Data](https://pypi.org/project/advent-of-code-data/) library was used to manage a local cache of puzzle instructions, input, and answer data. This minimized the load on the Advent of Code contest infrastructure.
 
-Puzzles were executed one at a time. For each (model, puzzle) tuple, the puzzle solving process was a loop:
+Puzzles were executed one at a time. For each (model, puzzle, language) tuple, the puzzle-solving process was a loop:
 
 ```python
 if part == 2:
@@ -80,7 +81,9 @@ for turn in range(5):
         prompt = incremental_prompt(results)
 ```
 
-The limit of 5 conversation turns was chosen by trial and error during development. It was common for a LLM to need 3-to-5 turns to solve a puzzle. The first turn might result in a syntax error, the second in an input parsing runtime error, the third in a timeout, the fourth is an incorrect answer, and so on.
+The `initial_prompt` function provided the puzzle instructions and requested the LLM to generate a program in the target language. The `incremental_prompt` function provided the results of the previous attempt (e.g., compiler errors, runtime errors, timeout status, or incorrect answer) and asked the LLM to correct the program. 
+
+The limit of 5 conversation turns was chosen by trial and error during development. It was common for a LLM to need 3 to 5 turns to solve a puzzle. The first turn might result in a syntax error, the second in an input parsing runtime error, the third in a timeout, the fourth in an incorrect answer, and so on.
 
 # Results
 
@@ -104,11 +107,11 @@ Note that there are 49 possible puzzles, which is why the percentages shown are 
 
 ## General Observations
 
-The model was run at its default temperature, which introduced variations in results over repeated runs. The model might succeed in solving a given puzzle on one run, but fail on another run. Keep in mind that the reported numbers could change +/- 2 puzzles if the same experiment were performed again. Therefore don't take the details of language ranking too seriously. Another run could well flip the positions of any two nearby languages.
+The model was run at its default temperature, which introduced variations in results over repeated runs. The model might succeed in solving a given puzzle on one run but fail on another run.  The reported numbers could change +/- 2 puzzles if the same experiment were performed again.  The language ranking represents a single sample from a probabilistic distribution. A future version of the experiment loop could sample each case multiple times, to produce a more nuanced view.
 
 ## Puzzle-Specific Observations
 
-Some puzzles were particularly hard for the model. The following puzzles not solved by any language:
+Some puzzles were particularly hard for the model. The following puzzles were not solved by any language:
 
 | Day-Part | Notes                                                                  |
 | -------- | ---------------------------------------------------------------------- |
@@ -116,11 +119,11 @@ Some puzzles were particularly hard for the model. The following puzzles not sol
 | 12-2     | Ambiguous instructions, domain knowledge of corner-counting algorithm. |
 | 14-2     | Ambiguous instructions.                                                |
 | 15-1     | Difficult simulation.                                                  |
-| 15-2     | Not attempted because no experiment solved precursor 15-1.             |
+| 15-2     | Not attempted because no experiment solved prerequisite 15-1.          |
 | 17-2     | Couldn't brute force. Required thinking outside of the box.            |
 | 21-1     | Ambiguous instructions, performance issues with naive solution.        |
-| 21-2     | Not attempted because no experiment solved precursor 21-1.             |
-| 24-2     | Required thinking outside of the box to solve in reasonable time.      |
+| 21-2     | Not attempted because no experiment solved prerequisite 21-1.          |
+| 24-2     | Required thinking outside of the box to solve in reasonable time.    
 
 FWIW these puzzles were difficult for humans to solve, too.
 
@@ -129,13 +132,13 @@ FWIW these puzzles were difficult for humans to solve, too.
 When interpreting the language rankings, keep in mind that the model has a non-zero temperature, so results vary from run to run.
 Any two languages that are within a few percent of each other on the chart could swap positions in subsequent runs.
 
-We see that a large number of languages have roughly the same solution rate. For these languages the model is capable of rendering a given algorithm in that language. These include C#, Dart, Go, Java, JavaScript, Kotlin, Lua, Objective-C, PHP, Python, Ruby, Rust, Swift, and TypeScript.
+We see that a large number of languages have roughly the same solution rate. For these languages, the model is capable of rendering a given algorithm in that language. These include C#, Dart, Go, Java, JavaScript, Kotlin, Lua, Objective-C, PHP, Python, Ruby, Rust, Swift, and TypeScript.
 
 Python and Rust are the two most popular languages used by Advent of Code participants. This may explain why Rust fares so well.
 
-Many less popular languages suffer from a large number of "errors", which covers any compile-time or runtime error such as a synax error or a type error, or a memory fault.
+Many less popular languages suffer from a large number of "errors," which covers any compile-time or runtime error such as a syntax error, a type error, or a memory fault.
 
-The C language suffers from memory issues. The model doesn't use dynamic data structures (even when prompted), and can't debug the resulting memory access errors. C++ fares better due to the standard library of common data structures.
+The C language suffers from memory issues. The model doesn't use dynamic data structures (even when prompted) and can't debug the resulting memory access errors. C++ fares better due to the standard library of common data structures.
 
 Haskell suffers from a dialect problem, as the model tries to use language features without properly enabling them.
 
@@ -143,11 +146,11 @@ The Lisps (SBCL and Clojure) suffer from paren mis-matches and mistakes using st
 
 Smalltalk suffers from calling methods that are not available in the specific Smalltalk dialect being used.
 
-Zig code generation suffers from confusion over whether variables should be declared const or non-const. The model has trouble interpreting the Zig compiler error messages, which seem to give errors relative to the function start, rather than relative to the file start.
+Zig code generation suffers from confusion over whether variables should be declared const or non-const. The model has trouble interpreting the Zig compiler error messages, which report error line numbers relative to the function start rather than relative to the file start.
 
 ## In-Model Code Execution
 
-The Gemini model supports code execution. When this feature is enabled, the model is able to construct and execute small Python programs during the conversation. I tested this feature three different ways.
+The Gemini model supports code execution. When this feature is enabled, the model can construct and execute small Python programs during the conversation. I tested this feature in three different ways.
 
 ![Code Execution](figures/code_execution_heatmap.png)
 
@@ -172,9 +175,9 @@ The `ce_answer` result was particularly poor. One reason appears to be that the 
 
 ## A digression: the effect of memorization on solvability
 
-Tha Advent of Code contest fosters an [active open-source and open-discussion culture](https://www.reddit.com/r/adventofcode/). Past contest puzzle algorithms and solutions are widely available on the web. To discourage trivial cheating, participants are discouraged from publishing the actual input data and answers. What this means is that solutions to past years Advent of Code puzzles are widely available on the web, and are probably present in most frontier LLM training data.
+The Advent of Code contest fosters an [active open-source and open-discussion culture](https://www.reddit.com/r/adventofcode/). Past contest puzzle algorithms and solutions are widely available on the web. To discourage trivial cheating, participants are discouraged from publishing the actual input data and answers. What this means is that solutions to past years Advent of Code puzzles are widely available on the web and are probably present in most frontier LLM training data.
 
-Looking at the solve rate for each year, we see that in general the model did better on older years than it did in 2024. But note that many years were not perfectly solved, despite the likelyhood that the LLM did see the solutions for those years in the training data.
+Looking at the solve rate for each year, we see that, in general, the model did better on older years than it did in 2024. But note that many years were not perfectly solved, despite the likelihood that the LLM did see the solutions for those years in the training data.
 
 ![AoC All Years Puzzle Solvability](figures/all_years_status.png)
 
@@ -194,7 +197,7 @@ The experiment could be continued, both to produce error bars for the existing m
 
 The experiment framework does not handle quota exhaustion as efficiently as it could. It currently throws away the entire conversation for the current puzzle. It would be more efficient to preserve the existing conversation, to be resumed when quota is available.
 
-Would asking the models to generate typed Python help catch syntax errors?
+Would asking the models to generate typed Python help catch syntax errors? (Initial experiments showed no benefit to adding types, perhaps due to these problems not requring elaborate types.)
 
 When a model gets stuck in a rut, would asking the model to start over help?
 
