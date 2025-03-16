@@ -199,11 +199,17 @@ The experiment framework does not handle quota exhaustion as efficiently as it c
 
 Would asking the models to generate typed Python help catch syntax errors? (Initial experiments showed no benefit to adding types, perhaps due to these problems not requring elaborate types.)
 
+Would providing a library that implements abstractions common to Advent of Code problems help? Peter Norvig has developed [a promising library for Python](https://github.com/norvig/pytudes/blob/main/ipynb/AdventUtils.ipynb).
+
+Would providing solution examples from previous AoC puzzles help?
+
 When a model gets stuck in a rut, would asking the model to start over help?
 
 It would be interesting to develop a heuristic for how many turns to give a model to solve a problem, perhaps based on the progress the model is making towards solving the problem, as measured by changes to the generated code and computed answer.
 
 Most Advent of Code puzzles can be easily solved if you take the right approach. It might be possible to split the puzzle solving into a search for the right approach followed by a separate prompt series to implement the right approach.
+
+Try solving puzzles using a cheap LLM first, and only use a more expensive LLM when the cheap LLM fails to solve the puzzle. This could reduce the overall costs of an evaluation run.
 
 # Conclusion
 
